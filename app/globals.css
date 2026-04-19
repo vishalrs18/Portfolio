@@ -10,6 +10,44 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  --font-manrope: manrope, sans-serif;
+  --spacing-1: 0.25rem;
+  --spacing-2: 0.5rem;
+  --spacing-3: 1rem;
+  --color-header-bg: #0e0e0f;
+  --color-app-theme: #81ecff;
+  --font-size-base: 1rem;
+  --color-primary-btn: #005762;
+  --font-size-small: 0.575rem;
+  --font-size-md: 1rem;
+  --font-size-lg: 1.125rem;
+  --font-size-xl: 1.25rem;
+  --font-size-2xl: 1.5rem;
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-app-theme text-primary-btn font-manrope text-base rounded-lg font-bold px-6 py-2 transition-colors duration-300;
+  }
+
+  .btn-primary:hover {
+    @apply bg-app-theme cursor-pointer text-white;
+  }
+
+  .btn-secondary {
+    @apply bg-transparent text-primary-btn font-manrope text-base rounded-lg font-bold px-6 py-2 border-2 border-primary-btn transition-colors duration-300;
+  }
+  .btn-secondary:hover {
+    @apply bg-primary-btn text-white cursor-pointer;
+  }
+
+  .secondary-text {
+    @apply text-sm text-[#ADAAAB];
+  }
+
+  .card-header {
+    @apply text-2xl font-bold font-manrope;
+  }
 }
 
 @media (prefers-color-scheme: dark) {
@@ -23,4 +61,58 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+}
+
+.obj-icon svg {
+  width: 24px;
+  height: 24px;
+  fill: var(--foreground);
+  stroke: white;
+}
+
+.obj-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@keyframes slideIn {
+  0% {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+#toast-root .slide-in {
+  animation: slideIn 0.3s ease-out;
+}
+
+#toast-root .fade-out {
+  animation: fadeOut 0.5s ease-out forwards;
+}
+
+.iframe-container {
+  padding: 16px;
+  > iframe {
+    width: 100% !important;
+    height: 100%;
+    border: none;
+    color: inherit;
+    #badge-name {
+      color: #adaaab;
+    }
+  }
+}
+
+@keyframes fadeOut {
+  0% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
 }
