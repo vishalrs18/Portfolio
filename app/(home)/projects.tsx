@@ -87,7 +87,7 @@ const Projects = () => {
         </div>
         <motion.div whileHover={{ x: 10 }} transition={{ duration: 0.3 }}>
           <Link
-            href="/projects"
+            href="/experience"
             className="text-app-theme font-manrope text-sm flex items-center gap-1 uppercase"
           >
             View Projects <ArrowRight />
