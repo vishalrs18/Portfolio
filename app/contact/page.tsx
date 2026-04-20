@@ -178,7 +178,7 @@ const Contact = () => {
           .map(([k, v]) => `${encodeURIComponent(k)}=${encodeURIComponent(v)}`)
           .join("&");
 
-      const result = await fetch("/contact", {
+      const result = await fetch("/__forms.html", {
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
         body: encode({ "form-name": "contact", ...entries }),
@@ -270,7 +270,7 @@ const Contact = () => {
             transition: { duration: 0.3 },
           }}
         >
-          <Form initialState={defaultState} reducerAction={handleFormSubmit} formProps={{ name: "contact", "data-netlify": "true" }}>
+          <Form initialState={defaultState} reducerAction={handleFormSubmit} formProps={{ name: "contact" }}>
             {({
               state,
               formAction,
