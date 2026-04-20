@@ -29,6 +29,34 @@ const SubmitButton = React.memo(
 
 SubmitButton.displayName = "SubmitButton";
 
+const dataValidation = (data: {
+  name: string;
+  email: string;
+  subject: string;
+  yourProject: string;
+}) => {
+  const { name, email, subject, yourProject } = data;
+  if (!name && !email && !subject && !yourProject)
+    throw new Error(JSON.stringify({ message: "All fields are required.", field: "all" }));
+  if (!name)
+    throw new Error(JSON.stringify({ message: "Name is required.", field: "name" }));
+  if (!email)
+    throw new Error(JSON.stringify({ message: "Email is required.", field: "email" }));
+  if (!subject)
+    throw new Error(JSON.stringify({ message: "Subject is required.", field: "subject" }));
+  if (!yourProject)
+    throw new Error(JSON.stringify({ message: "Project description is required.", field: "yourProject" }));
+  if (name.length < 2)
+    throw new Error(JSON.stringify({ message: "Name is too short. Please provide your full name.", field: "name" }));
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email))
+    throw new Error(JSON.stringify({ message: "Invalid email format. Please provide a valid email address.", field: "email" }));
+  if (subject.length < 5)
+    throw new Error(JSON.stringify({ message: "Subject is too short. Please provide a more descriptive subject.", field: "subject" }));
+  if (yourProject.length < 10)
+    throw new Error(JSON.stringify({ message: "Project description is too short. Please provide more details (at least 10 characters).", field: "yourProject" }));
+};
+
 const Contact = () => {
   const heroRef = useRef<HTMLDivElement>(null);
   const formRef = useRef<HTMLDivElement>(null);
@@ -129,17 +157,34 @@ const Contact = () => {
     setIsSubmitting(true);
 
     try {
-      const result = await fetch("/api", {
+      const entries = Object.fromEntries(formData as FormData) as Record<string, string>;
+
+      try {
+        dataValidation(entries as { name: string; email: string; subject: string; yourProject: string });
+      } catch (validationError: unknown) {
+        const { field, message } = JSON.parse((validationError as Error).message);
+        setErrorFields((prev) => ({ ...prev, [field]: message }));
+        showToast({
+          message: message || "Please fill in all required fields.",
+          type: "error",
+          closeable: true,
+        });
+        setIsSubmitting(false);
+        return prevState;
+      }
+
+      const encode = (data: Record<string, string>) =>
+        Object.entries(data)
+          .map(([k, v]) => `${encodeURIComponent(k)}=${encodeURIComponent(v)}`)
+          .join("&");
+
+      const result = await fetch("/contact", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(Object.fromEntries(formData as FormData)),
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: encode({ "form-name": "contact", ...entries }),
       });
 
-      const data = await result.json();
-
-      if (data.success) {
+      if (result.ok) {
         showToast({
           message: "Thank you for reaching out! I'll get back to you soon.",
           type: "success",
@@ -150,10 +195,8 @@ const Contact = () => {
           ...defaultState,
         };
       } else {
-        const { field, message } = JSON.parse(data.message);
-        setErrorFields((prev) => ({ ...prev, [field]: message }));
         showToast({
-          message: message || "Failed to submit form. Please try again.",
+          message: "Failed to submit form. Please try again.",
           type: "error",
           closeable: true,
         });
@@ -227,10 +270,9 @@ const Contact = () => {
             transition: { duration: 0.3 },
           }}
         >
-          <Form initialState={defaultState} reducerAction={handleFormSubmit}>
+          <Form initialState={defaultState} reducerAction={handleFormSubmit} formProps={{ name: "contact", "data-netlify": "true" }}>
             {({
               state,
-              isPending,
               formAction,
             }: {
               state: {
@@ -241,7 +283,6 @@ const Contact = () => {
                 subject?: string;
                 yourProject?: string;
               };
-              isPending: boolean;
               formAction: (
                 action: { type: string; payload: string } | FormData,
               ) => void;
@@ -249,6 +290,7 @@ const Contact = () => {
               //   console.log(state, isPending, "__s in parent");
               return (
                 <div className="grid grid-cols-2 gap-x-5 gap-y-8">
+                  <input type="hidden" name="form-name" value="contact" />
                   <motion.div
                     className="form-field"
                     whileHover={{ scale: 1.02 }}
